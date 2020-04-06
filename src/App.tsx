@@ -1,4 +1,6 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
+import axios from 'axios'
+
 import Container from '@material-ui/core/Container';
 import {withStyles, makeStyles, createStyles, Theme} from '@material-ui/core/styles';
 import Paper from '@material-ui/core/Paper';
@@ -39,8 +41,28 @@ const useStyles = makeStyles((theme: Theme) =>
     table: {
       minWidth: 700,
     },
+    FullNameInner: {
+      display: 'flex',
+      alignItems: 'center',
+    },
+    imageCoin: {
+      maxWidth: 30,
+      height: 30,
+      backgroundSize: 'cover',
+      backgroundRepeat: 'no-repeat',
+      marginRight: 15
+    }
   }),
 );
+
+type TCoin = {
+  'fullName': string;
+  'name': string;
+  'imageUrl': string;
+  'id': number;
+  'price': number;
+  'volume24hour': number;
+}
 
 const StyledTableCell = withStyles((theme: Theme) =>
   createStyles({
@@ -64,20 +86,26 @@ const StyledTableRow = withStyles((theme: Theme) =>
   }),
 )(TableRow);
 
-function createData(name: string, calories: number, fat: number, carbs: number, protein: number) {
-  return { name, calories, fat, carbs, protein };
-}
-
-const rows = [
-  createData('Frozen yoghurt', 159, 6.0, 24, 4.0),
-  createData('Ice cream sandwich', 237, 9.0, 37, 4.3),
-  createData('Eclair', 262, 16.0, 24, 6.0),
-  createData('Cupcake', 305, 3.7, 67, 4.3),
-  createData('Gingerbread', 356, 16.0, 49, 3.9),
-];
-
 const App = () => {
   const s = useStyles();
+  const [allCoins, setAllCoins] = useState<TCoin[]>([]);
+  useEffect(() => {
+    axios.get('https://min-api.cryptocompare.com/data/top/totalvolfull?limit=10&tsym=USD')
+      .then(({data}) => {
+        const coins: TCoin[] = data.Data.map((coin: any) => {
+          const obj: TCoin = {
+            fullName: coin.CoinInfo.FullName,
+            name: coin.CoinInfo.Name,
+            id: coin.CoinInfo.Id,
+            price: coin.RAW.USD.PRICE.toFixed(2),
+            'volume24hour': coin.RAW.USD.VOLUME24HOUR.toFixed(2),
+            imageUrl: `https://www.cryptocompare.com${coin.CoinInfo.ImageUrl}`
+          };
+          return obj;
+        });
+        setAllCoins(coins);
+      })
+  }, []);
   return (
     <Container className={s.root} maxWidth="lg">
       <Grid container spacing={1}>
@@ -94,14 +122,18 @@ const App = () => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {rows.map((row) => (
-                    <StyledTableRow key={row.name}>
+                  {allCoins.map((coin: TCoin) => (
+                    <StyledTableRow key={coin.id}>
                       <StyledTableCell component="th" scope="row">
-                        {row.name}
+                        <div className={s.FullNameInner}>
+                          <img className={s.imageCoin} src={coin.imageUrl}
+                               alt=""/>
+                          <div>{coin.fullName}</div>
+                        </div>
                       </StyledTableCell>
-                      <StyledTableCell align="center">{row.calories}</StyledTableCell>
-                      <StyledTableCell align="center">{row.fat}</StyledTableCell>
-                      <StyledTableCell align="center">{row.carbs}</StyledTableCell>
+                      <StyledTableCell align="center">{coin.name}</StyledTableCell>
+                      <StyledTableCell align="center">${coin.price}</StyledTableCell>
+                      <StyledTableCell align="center">${coin.volume24hour}</StyledTableCell>
                     </StyledTableRow>
                   ))}
                 </TableBody>
