@@ -33,6 +33,12 @@ export const useStyles = makeStyles((theme: Theme) =>
       backgroundSize: 'cover',
       backgroundRepeat: 'no-repeat',
       marginRight: 15
+    },
+    redColumn: {
+      backgroundColor:'#ffd7d7'
+    },
+    greenColumn: {
+      backgroundColor: '#d9ffd7'
     }
   }),
 );

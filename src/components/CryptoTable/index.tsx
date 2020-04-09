@@ -7,7 +7,7 @@ import TableRow from "@material-ui/core/TableRow";
 import TableBody from "@material-ui/core/TableBody";
 import {createStyles, Theme, withStyles} from "@material-ui/core/styles";
 import TableCell from "@material-ui/core/TableCell";
-import {TCoin} from "../../types";
+import {TCoin, TCoinDiff} from "../../types";
 import {inject, observer} from "mobx-react";
 import CurrenciesStore from "../../stores/currenciesStore";
 
@@ -15,6 +15,7 @@ interface ICryptoTable {
   s: any;
   currenciesStore?: CurrenciesStore;
 }
+
 
 const StyledTableCell = withStyles((theme: Theme) =>
   createStyles({
@@ -41,9 +42,17 @@ const StyledTableRow = withStyles((theme: Theme) =>
 const CryptoTable = inject('currenciesStore')
 (observer(({s, currenciesStore}: ICryptoTable) => {
   const items: TCoin[] = currenciesStore!.getItems;
+  const diffObj: TCoinDiff = currenciesStore!.getDiffObj;
+
+  // currenciesStore?.setItems()
 
   React.useEffect(() => {
-    currenciesStore?.fetchCoins();
+    if (currenciesStore) {
+      currenciesStore.fetchCoins();
+      setInterval(() => {
+        currenciesStore.fetchCoins();
+      }, 30000)
+    }
   }, []);
 
   return (
@@ -69,7 +78,8 @@ const CryptoTable = inject('currenciesStore')
                   </div>
                 </StyledTableCell>
                 <StyledTableCell align="center">{coin.name}</StyledTableCell>
-                <StyledTableCell align="center">${coin.price}</StyledTableCell>
+                <StyledTableCell className={diffObj[coin.name] && s[`${diffObj[coin.name]}Column`]}
+                                 align="center">${coin.price}</StyledTableCell>
                 <StyledTableCell align="center">${coin.volume24hour}</StyledTableCell>
               </StyledTableRow>
             ))}
