@@ -3,7 +3,7 @@ import CurrenciesStore from './currenciesStore'
 
 const stores = {
   currenciesStore: new CurrenciesStore(),
-  converterStore: new ConverterStore([])
+  converterStore: new ConverterStore()
 };
 
 export default stores;

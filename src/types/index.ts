@@ -8,3 +8,8 @@ export type TCoin = {
 }
 
 export type TCoinDiff = { [key: string]: string }
+
+export type TSelectedCoin = {
+  name: string;
+  price: number;
+}

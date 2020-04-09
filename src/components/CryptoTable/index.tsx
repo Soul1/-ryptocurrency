@@ -10,10 +10,12 @@ import TableCell from "@material-ui/core/TableCell";
 import {TCoin, TCoinDiff} from "../../types";
 import {inject, observer} from "mobx-react";
 import CurrenciesStore from "../../stores/currenciesStore";
+import ConverterStore from "../../stores/converterStore";
 
 interface ICryptoTable {
   s: any;
   currenciesStore?: CurrenciesStore;
+  converterStore?: ConverterStore;
 }
 
 
@@ -39,12 +41,10 @@ const StyledTableRow = withStyles((theme: Theme) =>
   }),
 )(TableRow);
 
-const CryptoTable = inject('currenciesStore')
-(observer(({s, currenciesStore}: ICryptoTable) => {
+const CryptoTable = inject('currenciesStore', 'converterStore')
+(observer(({s, currenciesStore, converterStore}: ICryptoTable) => {
   const items: TCoin[] = currenciesStore!.getItems;
   const diffObj: TCoinDiff = currenciesStore!.getDiffObj;
-
-  // currenciesStore?.setItems()
 
   React.useEffect(() => {
     if (currenciesStore) {
@@ -54,6 +54,12 @@ const CryptoTable = inject('currenciesStore')
       }, 30000)
     }
   }, []);
+
+  const onClickRow = (coin: TCoin) => {
+    if (converterStore) {
+      converterStore.setSelectedCoin(coin)
+    }
+  };
 
   return (
     <Paper className={s.paper}>
@@ -68,8 +74,9 @@ const CryptoTable = inject('currenciesStore')
             </TableRow>
           </TableHead>
           <TableBody>
-            {!items.length ? 'Загрузка...' : items.map((coin: TCoin) => (
-              <StyledTableRow key={coin.id}>
+            {!items.length ? 'Загрузка...'
+              : items.map((coin: TCoin) => (
+              <StyledTableRow onClick={() => onClickRow(coin)} className={s.rowCurrency} hover key={coin.id}>
                 <StyledTableCell component="th" scope="row">
                   <div className={s.FullNameInner}>
                     <img className={s.imageCoin} src={coin.imageUrl}

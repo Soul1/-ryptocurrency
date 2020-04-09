@@ -2,6 +2,8 @@ import {observable, computed, action} from 'mobx'
 import {TCoin, TCoinDiff} from "../types";
 import axios from 'axios'
 
+import stores from "../stores";
+
 class CurrenciesStore {
   @observable private items: TCoin[] = [];
   @observable private diffObj: TCoinDiff = {};
@@ -49,7 +51,8 @@ class CurrenciesStore {
           return obj;
         });
         this.setItems(coins)
-      })
+        stores.converterStore.setSelectedCoin(coins[0])
+      });
   };
 
   diffCurrencies(arr1: TCoin[], arr2: TCoin[]) {
